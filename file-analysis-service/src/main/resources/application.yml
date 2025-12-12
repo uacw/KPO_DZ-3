@@ -1,0 +1,23 @@
+server:
+  port: 8082
+  forward-headers-strategy: framework
+
+spring:
+  application:
+    name: file-analysis-service
+  servlet:
+    multipart:
+      max-file-size: 100KB
+      max-request-size: 100KB
+  datasource:
+    url: jdbc:postgresql://postgres:5432/analysis_db
+    driverClassName: org.postgresql.Driver
+    username: postgres
+    password: postgres
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+  h2:
+    console:
+      enabled: true

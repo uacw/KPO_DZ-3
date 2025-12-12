@@ -1,0 +1,37 @@
+server:
+  port: 8081
+  forward-headers-strategy: framework
+  # Настройки ошибок я оставил, они полезны для отладки
+  error:
+    include-message: always
+    include-binding-errors: always
+    include-stacktrace: always
+    include-exception: true
+
+spring:
+  application:
+    name: file-storing-service
+  servlet:
+    multipart:
+      max-file-size: 100KB
+      max-request-size: 100KB
+  datasource:
+    url: jdbc:postgresql://postgres:5432/storing_db
+    driverClassName: org.postgresql.Driver
+    username: postgres
+    password: postgres
+  jpa:
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    hibernate:
+      ddl-auto: update
+  h2:
+    console:
+      enabled: true
+
+logging:
+  level:
+    com.matusevich: DEBUG
+
+file:
+  storage:
+    path: ./uploads

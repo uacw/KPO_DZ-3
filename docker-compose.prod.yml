@@ -1,0 +1,60 @@
+services:
+  api-gateway:
+    build: 
+        context: .
+        dockerfile: api-gateway/Dockerfile.prod
+    ports:
+      - "8080:8080"
+    depends_on:
+      - file-storing-service
+      - file-analysis-service
+    networks:
+      - antiplagiarism-network
+
+  file-storing-service:
+    build:
+        context: .
+        dockerfile: file-storing-service/Dockerfile.prod
+    ports:
+      - "8081:8081"
+    volumes:
+      - ./uploads:/app/uploads
+    depends_on:
+        - postgres
+    networks:
+      - antiplagiarism-network
+
+  file-analysis-service:
+    build:
+        context: .
+        dockerfile: file-analysis-service/Dockerfile.prod
+    ports:
+      - "8082:8082"
+    volumes:
+      - ./data/analysis:/app/data
+    environment:
+      - FILE-STORING-SERVICE_URL=http://file-storing-service:8081
+    depends_on:
+      - postgres
+    networks:
+      - antiplagiarism-network
+
+  postgres:
+    image: postgres:15-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: postgres
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data_prod:/var/lib/postgresql/data
+      - ./init.sql:/docker-entrypoint-initdb.d/init.sql
+    networks:
+      - antiplagiarism-network
+
+volumes:
+  postgres_data_prod:
+
+networks:
+  antiplagiarism-network:
+    driver: bridge
