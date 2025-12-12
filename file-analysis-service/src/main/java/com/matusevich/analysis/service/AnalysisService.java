@@ -50,10 +50,14 @@ public class AnalysisService {
                     
                     // Сравниваем байт-в-байт
                     if (java.util.Arrays.equals(currentContent, otherContent)) {
-                        isPlagiarism = true;
-                        score = 100;
-                        log.info("Опа)) Плагиат: работа {} списана с {}", workId, sub.getId());
-                        break;
+                        // Если содержимое совпадает, проверяем, кто сдал позже
+                        // Если МЫ сдали позже — значит МЫ списали.
+                        if (currentSubmission.getSubmissionDate().isAfter(sub.getSubmissionDate())) {
+                            isPlagiarism = true;
+                            score = 100;
+                            log.info("Опа)) Плагиат: работа {} списана с более ранней работы {}", workId, sub.getId());
+                            break;
+                        }
                     }
                 } catch (Exception e) {
                     log.warn("Не смогли скачать файл {} для сравнения, пропускаем...", sub.getId());
@@ -61,6 +65,9 @@ public class AnalysisService {
                 }
             }
         }
+        
+        // Удаляем старый отчет, если он был (чтобы не дублировать)
+        repository.findByWorkId(workId).ifPresent(repository::delete);
 
         Report report = new Report(workId, isPlagiarism, score);
         return repository.save(report);
